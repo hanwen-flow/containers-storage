@@ -3,7 +3,6 @@
 package chrootarchive
 
 import (
-	gotar "archive/tar"
 	"bytes"
 	"io"
 	"os"
@@ -11,6 +10,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	gotar "github.com/hanwen-flow/hacktar"
 
 	"github.com/containers/storage/pkg/archive"
 	"golang.org/x/sys/unix"

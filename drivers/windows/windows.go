@@ -4,7 +4,7 @@
 package windows
 
 import (
-	"archive/tar"
+	tar "github.com/hanwen-flow/hacktar"
 	"bufio"
 	"bytes"
 	"errors"

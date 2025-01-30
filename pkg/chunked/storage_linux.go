@@ -1,7 +1,6 @@
 package chunked
 
 import (
-	archivetar "archive/tar"
 	"bytes"
 	"context"
 	"encoding/base64"
@@ -17,6 +16,8 @@ import (
 	"strings"
 	"sync"
 	"syscall"
+
+	archivetar "github.com/hanwen-flow/hacktar"
 
 	"github.com/containerd/stargz-snapshotter/estargz"
 	storage "github.com/containers/storage"

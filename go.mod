@@ -1,4 +1,4 @@
-go 1.22.0
+go 1.22.2
 
 // Warning: Ensure the "go" and "toolchain" versions match exactly to prevent unwanted auto-updates.
 // That generally means there should be no toolchain directive present.
@@ -13,6 +13,7 @@ require (
 	github.com/cyphar/filepath-securejoin v0.3.6
 	github.com/docker/go-units v0.5.0
 	github.com/google/go-intervals v0.0.2
+	github.com/hanwen-flow/hacktar v0.0.0-20250128090015-cd987c60c88c
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/json-iterator/go v1.1.12
 	github.com/klauspost/compress v1.17.11

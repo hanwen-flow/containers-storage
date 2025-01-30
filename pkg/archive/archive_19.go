@@ -3,7 +3,7 @@
 package archive
 
 import (
-	"archive/tar"
+	tar "github.com/hanwen-flow/hacktar"
 )
 
 func copyPassHeader(hdr *tar.Header) {

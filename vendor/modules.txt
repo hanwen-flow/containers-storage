@@ -84,6 +84,9 @@ github.com/google/go-intervals/intervalset
 # github.com/google/uuid v1.6.0
 ## explicit
 github.com/google/uuid
+# github.com/hanwen-flow/hacktar v0.0.0-20250128090015-cd987c60c88c
+## explicit; go 1.22.2
+github.com/hanwen-flow/hacktar
 # github.com/hashicorp/errwrap v1.1.0
 ## explicit
 github.com/hashicorp/errwrap

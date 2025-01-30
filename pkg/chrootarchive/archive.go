@@ -1,12 +1,13 @@
 package chrootarchive
 
 import (
-	stdtar "archive/tar"
 	"fmt"
 	"io"
 	"os"
 	"path/filepath"
 	"sync"
+
+	stdtar "github.com/hanwen-flow/hacktar"
 
 	"github.com/containers/storage/pkg/archive"
 	"github.com/containers/storage/pkg/fileutils"

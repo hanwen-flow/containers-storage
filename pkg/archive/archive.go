@@ -1,7 +1,7 @@
 package archive
 
 import (
-	"archive/tar"
+	tar "github.com/hanwen-flow/hacktar"
 	"bufio"
 	"bytes"
 	"compress/bzip2"

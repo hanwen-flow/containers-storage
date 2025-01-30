@@ -1,7 +1,6 @@
 package chunked
 
 import (
-	archivetar "archive/tar"
 	"bytes"
 	"errors"
 	"fmt"
@@ -9,6 +8,8 @@ import (
 	"maps"
 	"strconv"
 	"time"
+
+	archivetar "github.com/hanwen-flow/hacktar"
 
 	"github.com/containers/storage/pkg/chunked/internal/minimal"
 	"github.com/klauspost/compress/zstd"

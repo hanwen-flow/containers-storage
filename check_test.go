@@ -1,7 +1,7 @@
 package storage
 
 import (
-	"archive/tar"
+	tar "github.com/hanwen-flow/hacktar"
 	"testing"
 
 	"github.com/containers/storage/pkg/archive"

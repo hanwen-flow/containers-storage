@@ -1,7 +1,7 @@
 package archive
 
 import (
-	"archive/tar"
+	tar "github.com/hanwen-flow/hacktar"
 	"io"
 	"io/fs"
 	"os"
