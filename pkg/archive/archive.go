@@ -845,47 +845,31 @@ func Tar(path string, compression Compression) (io.ReadCloser, error) {
 // TarWithOptions creates an archive from the directory at `path`, only including files whose relative
 // paths are included in `options.IncludeFiles` (if non-nil) or not in `options.ExcludePatterns`.
 func TarWithOptions(srcPath string, options *TarOptions) (io.ReadCloser, error) {
-	// Fix the source path to work with long path names. This is a no-op
-	// on platforms other than Windows.
-	srcPath = fixVolumePathPrefix(srcPath)
-
-	pm, err := fileutils.NewPatternMatcher(options.ExcludePatterns)
-	if err != nil {
+	if _, err := fileutils.NewPatternMatcher(options.ExcludePatterns); err != nil {
 		return nil, err
 	}
 
-	pipeReader, pipeWriter := io.Pipe()
+	tarWithOptionsTo := func(dest io.WriteCloser, srcPath string, options *TarOptions) error {
+		// Fix the source path to work with long path names. This is a no-op
+		// on platforms other than Windows.
+		srcPath = fixVolumePathPrefix(srcPath)
 
-	compressWriter, err := CompressStream(pipeWriter, options.Compression)
-	if err != nil {
-		return nil, err
-	}
-
-	go func() {
 		// make changes thread-safe.
 		copy := *options
 		options = &copy
 
+		pm, err := fileutils.NewPatternMatcher(options.ExcludePatterns)
+		if err != nil {
+			return err
+		}
+
 		ta := newTarWriter(
 			idtools.NewIDMappingsFromMaps(options.UIDMaps, options.GIDMaps),
-			compressWriter,
+			dest,
 			options.ChownOpts,
 		)
 		ta.WhiteoutConverter = GetWhiteoutConverter(options.WhiteoutFormat, options.WhiteoutData)
 		ta.CopyPass = options.CopyPass
-
-		defer func() {
-			// Make sure to check the error on Close.
-			if err := ta.TarWriter.Close(); err != nil {
-				logrus.Errorf("Can't close tar writer: %s", err)
-			}
-			if err := compressWriter.Close(); err != nil {
-				logrus.Errorf("Can't close compress writer: %s", err)
-			}
-			if err := pipeWriter.Close(); err != nil {
-				logrus.Errorf("Can't close pipe writer: %s", err)
-			}
-		}()
 
 		// this buffer is needed for the duration of this piped stream
 		defer pools.BufioWriter32KPool.Put(ta.Buffer)
@@ -897,7 +881,7 @@ func TarWithOptions(srcPath string, options *TarOptions) (io.ReadCloser, error) 
 
 		stat, err := os.Lstat(srcPath)
 		if err != nil {
-			return
+			return err
 		}
 
 		if !stat.IsDir() {
@@ -1015,9 +999,28 @@ func TarWithOptions(srcPath string, options *TarOptions) (io.ReadCloser, error) 
 				}
 				return nil
 			}); err != nil {
-				logrus.Errorf("%s", err)
-				return
+				return err
 			}
+		}
+		return ta.TarWriter.Close()
+	}
+
+	pipeReader, pipeWriter := io.Pipe()
+
+	compressWriter, err := CompressStream(pipeWriter, options.Compression)
+	if err != nil {
+		return nil, err
+	}
+
+	go func() {
+		if err := tarWithOptionsTo(compressWriter, srcPath, options); err != nil {
+			logrus.Errorf("Can't create tar archive: %s", err)
+		}
+		if err := compressWriter.Close(); err != nil {
+			logrus.Errorf("Can't close compress writer: %s", err)
+		}
+		if err := pipeWriter.Close(); err != nil {
+			logrus.Errorf("Can't close pipe writer: %s", err)
 		}
 	}()
 
