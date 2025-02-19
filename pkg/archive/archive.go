@@ -862,6 +862,10 @@ func TarWithOptions(srcPath string, options *TarOptions) (io.ReadCloser, error) 
 	}
 
 	go func() {
+		// make changes thread-safe.
+		copy := *options
+		options = &copy
+
 		ta := newTarWriter(
 			idtools.NewIDMappingsFromMaps(options.UIDMaps, options.GIDMaps),
 			compressWriter,
@@ -1200,6 +1204,10 @@ func untarHandler(tarArchive io.Reader, dest string, options *TarOptions, decomp
 	dest = filepath.Clean(dest)
 	if options == nil {
 		options = &TarOptions{}
+	} else {
+		// make writes thread-safe.
+		copy := *options
+		options = &copy
 	}
 	if options.ExcludePatterns == nil {
 		options.ExcludePatterns = []string{}
