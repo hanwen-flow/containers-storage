@@ -5,11 +5,13 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"log"
 	"net"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -1265,4 +1267,48 @@ func TestTimestamp(t *testing.T) {
 
 	// we expect the ones with a fixed timestamp to be the same
 	assert.Equal(t, origTarEpochOptions, laterTarEpochOptions)
+}
+
+func TestTarLinux(t *testing.T) {
+	srcDir := os.Getenv("TARDIR")
+	tarDest := os.Getenv("TARDEST")
+	log.Printf("tarring %q", srcDir)
+	var with, without []time.Duration
+	for i := 0; i < 10; i++ {
+		start := time.Now()
+		f, err := os.OpenFile(tarDest, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0666)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		var dest io.WriteCloser
+
+		dest = f
+		measurement := &without
+		if i%2 == 0 {
+			dest, err = CompressStream(f, Uncompressed)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			measurement = &with
+		}
+
+		err = tarWithOptionsTo(dest, srcDir, &TarOptions{})
+		if err != nil {
+			t.Fatal(err)
+		}
+		f.Close()
+
+		dt := time.Now().Sub(start)
+		*measurement = append(*measurement, dt)
+
+		log.Println(dt)
+	}
+
+	slices.Sort(with)
+	slices.Sort(without)
+	log.Printf("With %v, without %v", with[len(with)/2],
+		without[len(without)/2])
+
 }
